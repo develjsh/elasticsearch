@@ -41,3 +41,41 @@ Error: Main method not found in the file, please define the main method as: publ
 
 5. ElasticSearchConfig 구현합니다.
 Spring Data Elasticsearch는 ElasticsearchClient를 통해 Elasticsearch 노드 혹은 클러스터와 연결됩니다. ElasticsearchClient를 직접 사용할 수 있지만, 대게 더 추상화된 ElasticsearchOperations 혹은 ElasticsearchRepository를 사용합니다.
+
+5.1 ElasticsearchClient 구현체는 RestHighLevelClient가 일반적입니다.
+
+6. application.properties에서 logging 설정
+logging:
+  level:
+    logging.level.org.springframework.data.elasticsearch.client.WIRE=TRACE
+
+7. BasicProfile을 @Embeddable로 생성해줍니다.
+
+8. User.java 생성해줍니다.
+@Document: 해당 클래스가 elasticsearch DB에 매핑될 클래스라는 것을 표기해줍니다. @Documented와는 다릅니다.
+@Id: JPA 엔티티 객체의 식별자로 사용할 필드에 적용하며, 유니크한 DB의 컬럼과 맵핑합니다.
+@GeneratedValue(strategy = GenerationType.IDENTITY): 기본키를 자동으로 생성 방식을 설정해줍니다.
+  - GenerationType.IDENTITY: 기본키 생성을 데이터베이스에게 위임하는 방식으로 id값을 따로 할당하지 않아도 데이터베이스가 자동으로
+    AUTO_INCREMENT를 하여 기본키를 생성해줍니다.
+  - GenerationType.SEQUNCE: @SequenceGenerator 어노테이션이 필요합니다. 그리고 데이터 베이스의 Sequence Object를 
+    사용하여 데이터베이스가 자동으로 기본키를 생성해줍니다.
+    SEQUENCE는 값을 계속 DB에서 가져와서 사용해야 하기 때문에 성능에 저하를 일으킬 수 있기 때문에 allocationSize 의 크기를 적당히 설정하여 성능 저하를 개선시킬 수 있습니다.
+  - GenerationType.TABLE: @TableGenerator 어노테이션이 필요하며, 키를 생성하는 테이블을 사용하는 방법으로 Sequence와 
+    유사합니다.
+  - GenerationType.AUTO: 본 설정 값으로 각 데이터베이스에 따라 기본키를 자동으로 생성합니다.
+    제약조건:
+    null이면 안됩니다.
+    유일하게 식별할 수 있어야합니다.
+    변하지 않는 값이어야 합니다.
+@Embedded: 복합 값 타입으로 불리며 새로운 값 타입을 직접 정의해서 사용하는 JPA의 방법을 의미합니다.
+@PersistenceCreator: 데이터베이스에서 가져온 객체를 초기화할 때 사용할 생성자를 마킹해줍니다.
+매개변수가 존재하는 생성자가 여러개 존재할 때 @PersistenceConstructor를 사용하지 않으면 org.springframework.data.mapping.model.MappingInstantiationException이 발생합니다.
+
+9. ElasticsearchRepository 인터페이스를 생성합니다.
+PagingAndSortingRepository를 extends 해줍니다.
+
+10. UserRepository 인터페이스를 생성합니다.
+
+11. ElasticSearchConfig.java에 @EnableElasticsearchRepositories있는걸 확인합니다.
+
+
